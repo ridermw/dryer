@@ -129,9 +129,7 @@ def _csharp_left_out(file_path: Path) -> bool:
     folder = file_path.absolute().parent
     project = _csharp_project(folder)
     if project is None:
-        return any(_csharp_test_name(part) for part in file_path.parts[:-1]) or any(
-            part in _CSHARP_BUILD_DIRS for part in file_path.parts[:-1]
-        )
+        return any(_csharp_test_name(part) for part in file_path.parts[:-1])
     if not _CSHARP_BUILD_DIRS.isdisjoint(folder.relative_to(project).parts):
         return True
     return _csharp_test_project(project)

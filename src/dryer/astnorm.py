@@ -268,7 +268,7 @@ _PENDING = object()
 def _is_literal(node) -> bool:
     if node.type not in _LITERALS:
         return False
-    if node.type in {"string", "interpolated_string_expression"} and any(
+    if node.type in {"string", "template_string", "interpolated_string_expression"} and any(
         child.type in _INTERPOLATIONS for child in node.children
     ):
         return False
@@ -330,13 +330,16 @@ def _ps_leaf(node, head: bool):
         return K("symbol")
     if node.type == "string_literal":
         if any(
-            child.type == "expandable_string_literal" and child.named_children
+            child.type in {"expandable_string_literal", "expandable_here_string_literal"}
+            and child.named_children
             for child in node.children
         ):
             return _PENDING
         return K("literal")
-    if node.type in {"verbatim_string_characters", "verbatim_here_string_characters", "expandable_here_string_literal"}:
+    if node.type in {"verbatim_string_characters", "verbatim_here_string_characters"}:
         return K("literal")
+    if node.type == "expandable_here_string_literal":
+        return _PENDING if node.named_children else K("literal")
     if not node.is_named:
         low = _text(node).strip().lower()
         if low in _OPERATORS or low in _PS_OPERATOR_TOKENS or node.type in _OPERATORS:
