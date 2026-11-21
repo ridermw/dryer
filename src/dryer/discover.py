@@ -122,7 +122,8 @@ def _csharp_project(folder: Path) -> Path | None:
 def _csharp_test_project(project: Path) -> bool:
     if _csharp_test_name(project.name):
         return True
-    return any(_marks_a_test_project(csproj) for csproj in project.glob("*.csproj"))
+    projs = list(project.glob("*.csproj"))
+    return bool(projs) and all(_marks_a_test_project(csproj) for csproj in projs)
 
 
 def _csharp_left_out(file_path: Path) -> bool:

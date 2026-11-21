@@ -320,7 +320,9 @@ def _ps_leaf(node, head: bool):
     if node.type == "command_name":
         return [K("symbol"), _text(node).strip().lower()]
     if node.type == "member_name":
-        return [K("symbol"), _text(node).strip().lower()]
+        if node.parent is not None and node.parent.type == "invokation_expression":
+            return [K("symbol"), _text(node).strip().lower()]
+        return K("symbol")
     if node.type == "function_name":
         return K("symbol")
     if node.type == "variable":
