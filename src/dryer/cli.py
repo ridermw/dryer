@@ -21,16 +21,17 @@ def _skipped_directory_text() -> str:
 HELP = f"""\
 Usage: dryer [options] [path-or-filter ...]
 
-Find candidate duplicate code in Clojure, Java, Go, TypeScript, Rust, and
-Python. Each form is normalized — call and method names, operators, and
-tree shape stay; local names, field names, and literals do not — and compared
-with the other forms of the same language. The score is Jaccard similarity of
-those structural fingerprints, the same score as dry4clj.
+Find candidate duplicate code in Clojure, Java, Go, TypeScript/JavaScript,
+Rust, Python, C#, and PowerShell. Each form is normalized — call and method
+names, operators, and tree shape stay; local names, field names, and literals
+do not — and compared with the other forms of the same language. The score is
+Jaccard similarity of those structural fingerprints, the same score as dry4clj.
 
 Prints a report and writes .metrics/dry.edn.
 
 Languages: Clojure (.clj .cljc .cljs .cljd .bb), Java (.java), Go (.go),
-TypeScript (.ts .tsx .mts .cts), Rust (.rs), Python (.py).
+TypeScript/JavaScript (.ts .tsx .mts .cts .js .jsx .mjs .cjs), Rust (.rs),
+Python (.py), C# (.cs), PowerShell (.ps1 .psm1).
 
 Options:
   -h, --help                    Print this help and exit.
@@ -40,7 +41,8 @@ Options:
                                 May be repeated.
   --changed                     Compare added and modified source files from
                                 git status.
-  --threshold N                 Minimum similarity score, default 0.82.
+  --threshold N                 Minimum similarity score from 0 to 1 inclusive,
+                                default 0.82.
   --min-lines N                 Minimum source lines in a candidate form,
                                 default 4.
   --min-nodes N                 Minimum normalized syntax nodes, default 20.
@@ -125,6 +127,8 @@ def parse_args(argv: list[str] | None = None) -> Options:
                 continue
             if arg == "--threshold":
                 options.threshold = _number(_take(args, index, arg), arg)
+                if not 0 <= options.threshold <= 1:
+                    raise ValueError("--threshold must be between 0 and 1 inclusive")
                 index += 2
                 continue
             if arg == "--min-lines":
@@ -176,11 +180,13 @@ class GitStatusError(Exception):
 
 
 def _git(root: Path, *args: str) -> bytes:
+    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
     result = subprocess.run(
         ["git", "-C", os.fspath(root), *args],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         check=False,
+        env=env,
     )
     if result.returncode != 0:
         message = os.fsdecode(result.stderr).strip() or "git status failed"

@@ -1,6 +1,6 @@
 ---
 name: dryer
-description: Use when looking for duplicated or copy-pasted code, when two functions look alike and might be merged, when dryer prints a DUPLICATE pair, or when .metrics/dry.edn needs refreshing, in Clojure, Java, Go, TypeScript, Rust, or Python projects.
+description: Use when looking for duplicated or copy-pasted code, when two functions look alike and might be merged, when dryer prints a DUPLICATE pair, or when .metrics/dry.edn needs refreshing, in Clojure, Java, Go, TypeScript, JavaScript, Rust, Python, C#, or PowerShell projects.
 ---
 
 # dryer
