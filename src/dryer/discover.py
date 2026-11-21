@@ -148,7 +148,7 @@ def is_test_file(path: str | Path) -> bool:
         return True
     if name.endswith(("_test.clj", "_test.cljc", "_test.cljs", "_test.cljd", "_test.bb")):
         return True
-    if name.endswith(
+    if lower.endswith(
         (
             ".test.ts",
             ".spec.ts",
